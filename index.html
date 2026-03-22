@@ -5,115 +5,243 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>dylan's pythagorean triple algorithm</title>
 <style>
-  body {
-    font-family: system-ui, sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    background: #0f172a;
-    color: #f8fafc;
-  }
-  h1 {
-    margin-bottom: 1rem;
-  }
-  .card {
-    background: #1e293b;
-    padding: 2rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-    width: 360px;
-    text-align: center;
-  }
-  input, button {
-    padding: 0.5rem;
-    margin-top: 0.5rem;
-    border-radius: 6px;
-    border: none;
-    font-size: 1rem;
-  }
-  input {
-    width: 100%;
-    text-align: center;
-  }
-  button {
-    width: 100%;
-    background: #3b82f6;
-    color: white;
-    cursor: pointer;
-  }
-  button:hover {
-    background: #2563eb;
-  }
-  #result {
-    margin-top: 1rem;
-    font-size: 1.1rem;
-    text-align: left;
-  }
-  .triple {
-    background: #334155;
-    padding: 0.5rem;
-    border-radius: 6px;
-    margin-top: 0.5rem;
-  }
+:root {
+  --bg: #020617;
+  --card: rgba(15, 23, 42, 0.75);
+  --border: rgba(148, 163, 184, 0.15);
+  --accent: #38bdf8;
+  --accent-strong: #0ea5e9;
+  --text: #e5e7eb;
+  --muted: #94a3b8;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: radial-gradient(circle at top, #020617, #020617);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 2rem;
+}
+.container { display: flex; flex-direction: column; align-items: center; }
+.card {
+  background: var(--card);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  width: 440px;
+  padding: 2rem;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+  margin-bottom: 1.5rem;
+  animation: floatIn 0.8s ease;
+}
+@keyframes floatIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+h1 { font-size: 1.35rem; margin-bottom: 1rem; }
+h2 { font-size: 1.1rem; margin-bottom: 0.6rem; }
+input, select {
+  width: 100%;
+  padding: 0.7rem;
+  margin-top: 0.6rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(2,6,23,0.6);
+  color: var(--text);
+  font-size: 1rem;
+  transition: all 0.25s ease;
+}
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--accent) 50%), linear-gradient(135deg, var(--accent) 50%, transparent 50%);
+  background-position: calc(100% - 1rem) calc(1em + 2px), calc(100% - 0.8rem) calc(1em + 2px);
+  background-size: 0.6em 0.6em;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+select:hover { transform: scale(1.03); box-shadow: 0 0 12px rgba(56,189,248,0.5); }
+select:focus { border-color: var(--accent-strong); box-shadow: 0 0 15px rgba(56,189,248,0.6); outline: none; transform: scale(1.04); }
+select option { background: var(--card); color: var(--text); }
+button {
+  margin-top: 0.8rem;
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+  color: white;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+button:hover { transform: translateY(-1px) scale(1.02); box-shadow: 0 0 20px rgba(56,189,248,0.5); }
+#result { margin-top: 1.2rem; display: flex; flex-direction: column; align-items: center; }
+.triple {
+  background: rgba(30,41,59,0.7);
+  border-radius: 10px;
+  padding: 0.6rem;
+  margin-top: 0.5rem;
+  width: 100%;
+  text-align: center;
+  animation: slideUp 0.3s ease forwards;
+}
+@keyframes slideUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+strong { color: var(--accent); }
+.about { margin-top: 1.5rem; }
+.about p, .about li { font-size: 0.9rem; color: var(--muted); line-height: 1.5; }
+.about ul { padding-left: 1.2rem; margin: 0.6rem 0; }
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  text-align: center;
+}
+.pagination span { min-width: 100px; display: inline-block; }
+.pagination button { width: auto; padding: 0.5rem 1rem; }
 </style>
 </head>
 <body>
+<div class="container">
   <div class="card">
     <h1>dylan's pythagorean triple algorithm</h1>
-    <input type="number" id="sideInput" placeholder="enter side length" min="1">
+    <input id="sideInput" placeholder="enter side (e.g. 5, 2.5, 3/4)">
+    <select id="mode">
+      <option value="integer">integer triples only</option>
+      <option value="decimal">decimal-scaled triples</option>
+      <option value="fraction">exact fractional triples</option>
+    </select>
     <button onclick="generateTriples()">generate</button>
     <div id="result"></div>
+    <div class="pagination" id="pagination" style="display:none;">
+      <button onclick="prevPage()">← Prev</button>
+      <span id="pageInfo"></span>
+      <button onclick="nextPage()">Next →</button>
+    </div>
   </div>
 
+  <div class="card about">
+    <h2>what is this?</h2>
+    <p>This website generates <strong>Pythagorean triples</strong> using Euclid’s formula. A Pythagorean triple is a set of three numbers <em>(a, b, c)</em> that satisfy:</p>
+    <p style="text-align:center; margin:0.8rem 0;"><strong>a² + b² = c²</strong></p>
+    <p>Enter a side length to find all right triangles where that value appears as either a leg or the hypotenuse.</p>
+    <ul>
+      <li><strong>Integer mode</strong> – only whole-number triples</li>
+      <li><strong>Decimal mode</strong> – scaled decimal values</li>
+      <li><strong>Fraction mode</strong> – exact fractional results, input must be a fraction</li>
+    </ul>
+    <p>This tool is meant for exploring number theory, scaling behavior, and the structure behind right triangles.</p>
+  </div>
+</div>
+
 <script>
-function generateTriples() {
-  const side = parseInt(document.getElementById("sideInput").value);
-  const resultDiv = document.getElementById("result");
-  resultDiv.innerHTML = "";
+let allTriples = [];
+let currentPage = 1;
+const pageSize = 10;
 
-  if (!side || side <= 0) {
-    resultDiv.textContent = "please enter a valid positive number.";
+function gcd(a,b){while(b)[a,b]=[b,a%b];return Math.abs(a);}
+
+function parseFraction(x){
+  if(!x.includes("/")) return null;
+  const [n,d]=x.split("/").map(Number);
+  if(!d) return null;
+  return {n,d};
+}
+
+function simplify(f){ const g=gcd(f.n,f.d); return {n:f.n/g,d:f.d/g}; }
+
+function format(f,mode){
+  if(mode==="integer") return f.n;
+  if(mode==="decimal") return (f.n/f.d).toFixed(4);
+  return `${f.n}/${f.d}`;
+}
+
+function showPage(page){
+  const result=document.getElementById("result");
+  const pagination=document.getElementById("pagination");
+  result.innerHTML="";
+  const totalPages=Math.ceil(allTriples.length/pageSize);
+  if(allTriples.length===0){
+    result.textContent="No triples found.";
+    pagination.style.display="none";
     return;
   }
+  const start=(page-1)*pageSize;
+  const end=Math.min(start+pageSize, allTriples.length);
+  for(let i=start;i<end;i++){
+    const triple=allTriples[i];
+    const div=document.createElement("div");
+    div.className="triple";
+    div.innerHTML=`(${triple.a}, ${triple.b}, ${triple.c}) — <strong>${triple.role}</strong>`;
+    result.appendChild(div);
+  }
+  document.getElementById("pageInfo").textContent=`Page ${page} of ${totalPages}`;
+  pagination.style.display=totalPages>1?"flex":"none";
+}
 
-  const triples = [];
+function prevPage(){ if(currentPage>1){ currentPage--; showPage(currentPage); } }
+function nextPage(){ if(currentPage*pageSize<allTriples.length){ currentPage++; showPage(currentPage); } }
 
-  for (let b = 1; b <= side * 10; b++) {
-    let cSquared = side * side + b * b;
-    let c = Math.floor(Math.sqrt(cSquared));
-    if (c * c === cSquared && c > 0) {
-      triples.push([side, b, c].sort((x, y) => x - y));
+function generateTriples(){
+  const input=document.getElementById("sideInput").value.trim();
+  const mode=document.getElementById("mode").value;
+  allTriples=[];
+  currentPage=1;
+
+  let side;
+  if(mode==="fraction"){
+    side=parseFraction(input);
+    if(!side){ document.getElementById("result").textContent="Fraction mode requires input like '3/4'."; return; }
+  } else {
+    side={n:Number(input), d:1};
+    if(isNaN(side.n) || side.n <=0){ document.getElementById("result").textContent="Enter a valid positive number."; return; }
+  }
+
+  const maxM=50; // higher to get more integer triples
+  const seen=new Set();
+
+  for(let m=2;m<=maxM;m++){
+    for(let n=1;n<m;n++){
+      if((m-n)%2===0||gcd(m,n)!==1) continue;
+      const A={n:m*m-n*n,d:1};
+      const B={n:2*m*n,d:1};
+      const C={n:m*m+n*n,d:1};
+
+      [A,B,C].forEach(base=>{
+        const k = simplify({n:side.n, d:side.d*base.n});
+        if(k.n <=0) return;
+        const a=simplify({n:A.n*k.n, d:k.d});
+        const b=simplify({n:B.n*k.n, d:k.d});
+        const c=simplify({n:C.n*k.n, d:k.d});
+
+        if(mode==="integer" && (a.d!==1 || b.d!==1 || c.d!==1)) return;
+        if(mode==="fraction" && (a.d===1 || b.d===1 || c.d===1)) return;
+
+        const triple=[a,b,c].sort((x,y)=>x.n/x.d - y.n/y.d);
+        const key=triple.map(t=>t.n+"/"+t.d).join(",");
+        if(!seen.has(key)){
+          seen.add(key);
+          let role = "leg";
+          if(a.n===side.n && a.d===side.d) role="leg";
+          if(b.n===side.n && b.d===side.d) role="leg";
+          if(c.n===side.n && c.d===side.d) role="hypotenuse";
+          allTriples.push({
+            a: format(triple[0],mode),
+            b: format(triple[1],mode),
+            c: format(triple[2],mode),
+            role
+          });
+        }
+      });
     }
   }
 
-  for (let a = 1; a < side; a++) {
-    let bSquared = side * side - a * a;
-    if (bSquared <= 0) continue;
-    let b = Math.floor(Math.sqrt(bSquared));
-    if (b * b === bSquared) {
-      triples.push([a, b, side].sort((x, y) => x - y));
-    }
-  }
-
-  const uniqueTriples = triples.map(JSON.stringify)
-                               .filter((v, i, a) => a.indexOf(v) === i)
-                               .map(JSON.parse);
-
-  if (uniqueTriples.length === 0) {
-    resultDiv.textContent = "no Pythagorean triples found for that number.";
-    return;
-  }
-
-  resultDiv.innerHTML = `<strong>triples containing ${side}:</strong><br>`;
-  uniqueTriples.forEach(([a, b, c]) => {
-    let role = side === c ? "hypotenuse" : "leg";
-    resultDiv.innerHTML += `
-      <div class="triple">
-        (${a}, ${b}, ${c}) — your number is the <strong>${role}</strong>
-      </div>`;
-  });
+  showPage(1);
 }
 </script>
 </body>
